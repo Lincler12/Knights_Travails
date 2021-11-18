@@ -56,6 +56,10 @@ class PolyTreeNode
     nil
   end
 
+  def inspect
+    @value.inspect
+  end
+
   def ==(other)
     # an to argument pou pairnas den yparxei epistrefeis false
     return false if other.nil?

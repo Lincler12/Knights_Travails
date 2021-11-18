@@ -1,7 +1,8 @@
+require 'byebug'
 require_relative 'PolyTreeNode'
 class KnightPathFinder
   def initialize(position_array)
-    @considered_positions = [position]
+    @considered_positions = [position_array]
     @root_node = PolyTreeNode.new(position_array)
     build_move_tree
   end
@@ -16,63 +17,44 @@ class KnightPathFinder
     end
   end
 
+  def find_path(end_pos)
+    end_node = @root_node.bfs(end_pos)
+    trace_path_back(end_node)
+  end
+
+  # Method to trace back from the end_path_node to the root using PolyTreeNode#parent
+  def trace_path_back(node)
+    debugger
+    path = [node.value]
+    until node.parent.nil?
+      path << node.parent.value
+      node = node.parent
+    end
+    path.reverse
+  end
+
   def process(node)
     positions = new_move_positions(node.value)
     positions.each { |pos| PolyTreeNode.new(pos).parent = node }
   end
 
+  MOVES = [
+    [-2, -1],
+    [-2, 1],
+    [-1, -2],
+    [-1,  2],
+    [1, -2],
+    [1,  2],
+    [2, -1],
+    [2,  1]
+  ]
+
   def self.valid_moves(pos)
     row, col = pos
     moves_array = []
-    if row == 0 and col == 0
-      moves_array << [row, col + 1]
-      moves_array << [row + 1, col]
-      moves_array << [row + 1, col + 1]
-    elsif row == 7 and col == 0
-      moves_array << [row - 1, col]
-      moves_array << [row - 1, col + 1]
-      moves_array << [row, col + 1]
-    elsif row == 0 and col == 7
-      moves_array << [row, col - 1]
-      moves_array << [row + 1, col - 1]
-      moves_array << [row + 1, col]
-    elsif row == 7 and col == 7
-      moves_array << [row - 1, col - 1]
-      moves_array << [row - 1, col]
-      moves_array << [row, col - 1]
-    elsif row == 0
-      moves_array << [row, col - 1]
-      moves_array << [row, col + 1]
-      moves_array << [row + 1, col - 1]
-      moves_array << [row + 1, col]
-      moves_array << [row + 1, col + 1]
-    elsif row == 7
-      moves_array << [row - 1, col - 1]
-      moves_array << [row - 1, col]
-      moves_array << [row - 1, col + 1]
-      moves_array << [row, col - 1]
-      moves_array << [row, col + 1]
-    elsif col == 0
-      moves_array << [row - 1, col]
-      moves_array << [row - 1, col + 1]
-      moves_array << [row, col + 1]
-      moves_array << [row + 1, col]
-      moves_array << [row + 1, col + 1]
-    elsif col == 7
-      moves_array << [row - 1, col - 1]
-      moves_array << [row - 1, col]
-      moves_array << [row, col - 1]
-      moves_array << [row + 1, col - 1]
-      moves_array << [row + 1, col]
-    else
-      moves_array << [row - 1, col - 1]
-      moves_array << [row - 1, col]
-      moves_array << [row - 1, col + 1]
-      moves_array << [row, col - 1]
-      moves_array << [row, col + 1]
-      moves_array << [row + 1, col - 1]
-      moves_array << [row + 1, col]
-      moves_array << [row + 1, col + 1]
+    MOVES.each do |dx, dy|
+      new_pos = [row + dx, col + dy]
+      moves_array << new_pos if new_pos.all? { |coord| coord.between?(0, 7) }
     end
     moves_array
   end
@@ -81,7 +63,7 @@ class KnightPathFinder
     return nil if pos.nil?
 
     correct_moves_array = []
-    moves_array = valid_moves(pos)
+    moves_array = self.class.valid_moves(pos)
     moves_array.each do |position|
       unless @considered_positions.include?(position)
         correct_moves_array << position
